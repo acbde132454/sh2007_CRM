@@ -1,0 +1,16 @@
+jsp题头
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+
+Ajax:
+$.ajax({
+  url : '',
+  type : '',
+  data : {},
+  dataType : 'json',
+  success : function(data){
+  }
+});
+
+$.get("",{},function(data){},'json');
+
+$.post("",{},function(data){},'json');
