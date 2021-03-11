@@ -9,7 +9,9 @@ import com.bjpowernode.crm.base.util.UUIDUtil;
 import com.bjpowernode.crm.settings.bean.User;
 import com.bjpowernode.crm.settings.mapper.UserMapper;
 import com.bjpowernode.crm.workbench.bean.Activity;
+import com.bjpowernode.crm.workbench.bean.ActivityRemark;
 import com.bjpowernode.crm.workbench.mapper.ActivityMapper;
+import com.bjpowernode.crm.workbench.mapper.ActivityRemarkMapper;
 import com.bjpowernode.crm.workbench.service.ActivityService;
 import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +29,9 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Autowired
     private UserMapper userMapper;
+
+    @Autowired
+    private ActivityRemarkMapper activityRemarkMapper;
 
     @Override
     public List<Activity> list(Activity activity,int page,int pageSize) {
@@ -102,5 +107,64 @@ public class ActivityServiceImpl implements ActivityService {
     @Override
     public Activity queryById(String id) {
         return activityMapper.selectByPrimaryKey(id);
+    }
+
+    @Override
+    public void deleteActivity(String id) {
+        int count = activityMapper.deleteByPrimaryKey(id);
+        if(count == 0){
+            throw new CrmException(CrmEnum.ACTIVITY_DELETE);
+        }
+    }
+
+    @Override
+    public Activity queryDetail(String id) {
+        Activity activity = activityMapper.selectByPrimaryKey(id);
+        User user = userMapper.selectByPrimaryKey(activity.getOwner());
+        activity.setOwner(user.getName());
+
+        //查询市场活动备注
+        ActivityRemark activityRemark = new ActivityRemark();
+        activityRemark.setActivityId(id);
+        List<ActivityRemark> activityRemarks = activityRemarkMapper.select(activityRemark);
+        for (ActivityRemark remark : activityRemarks) {
+            User user1 = userMapper.selectByPrimaryKey(remark.getUid());
+            remark.setUser(user1);
+        }
+        //描述二者关系
+        activity.setActivityRemarks(activityRemarks);
+        return activity;
+    }
+
+    @Override
+    public ActivityRemark saveRemark(ActivityRemark activityRemark) {
+        activityRemark.setId(UUIDUtil.getUUID());
+        activityRemark.setCreateTime(DateTimeUtil.getSysTime());
+        activityRemark.setEditFlag("0");
+        int count = activityRemarkMapper.insertSelective(activityRemark);
+        if(count == 0){
+            throw new CrmException(CrmEnum.ACTIVITY_REMARK_SAVE);
+        }
+        return activityRemark;
+    }
+
+    @Override
+    public ActivityRemark updateRemark(ActivityRemark activityRemark) {
+        activityRemark.setEditFlag("1");
+        activityRemark.setEditTime(DateTimeUtil.getSysTime());
+
+        int count = activityRemarkMapper.updateByPrimaryKeySelective(activityRemark);
+        if(count == 0){
+            throw new CrmException(CrmEnum.ACTIVITY_REMARK_UPDATE);
+        }
+        return activityRemark;
+    }
+
+    @Override
+    public void delRemark(String id) {
+        int count = activityRemarkMapper.deleteByPrimaryKey(id);
+        if(count == 0){
+            throw new CrmException(CrmEnum.ACTIVITY_REMARK_DELETE);
+        }
     }
 }

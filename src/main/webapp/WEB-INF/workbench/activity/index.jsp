@@ -210,7 +210,7 @@
 				<div class="btn-group" style="position: relative; top: 18%;">
 				  <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createActivityModal"><span class="glyphicon glyphicon-plus"></span> 创建</button>
 				  <button type="button" onclick="enableEdit()" class="btn btn-default"><span class="glyphicon glyphicon-pencil"></span> 修改</button>
-				  <button type="button" class="btn btn-danger"><span class="glyphicon glyphicon-minus"></span> 删除</button>
+				  <button type="button" onclick="deleteActivity()" class="btn btn-danger"><span class="glyphicon glyphicon-minus"></span> 删除</button>
 				</div>
 				
 			</div>
@@ -228,7 +228,7 @@
 					<tbody id="activityBody">
                         <%--<tr class="active">
                             <td><input type="checkbox" /></td>
-                            <td><a style="text-decoration: none; cursor: pointer;" onclick="window.location.href='detail.html';">发传单</a></td>
+                            <td><a style="text-decoration: none; cursor: pointer;" onclick="window.location.href='detail.jsp';">发传单</a></td>
                             <td>zhangsan</td>
                             <td>2020-10-10</td>
                             <td>2020-10-20</td>
@@ -280,7 +280,7 @@
 				var activity = data.t.list[i];
 				content += "<tr class='active'>\n" +
 						"                            <td><input class='son' value="+activity.id+"  type=\"checkbox\" /></td>\n" +
-						"                            <td><a style=\"text-decoration: none; cursor: pointer;\" onclick=\"window.location.href='detail.html';\">"+activity.name+"</a></td>\n" +
+						"                            <td><a style=\"text-decoration: none; cursor: pointer;\" href='/crm/workbench/activity/queryDetail?id="+activity.id+"'>"+activity.name+"</a></td>\n" +
 						"                            <td>"+activity.owner+"</td>\n" +
 						"                            <td>"+activity.startDate+"</td>\n" +
 						"                            <td>"+activity.endDate+"</td>\n" +
@@ -389,6 +389,7 @@
 		$('.son').each(function () {
 			$(this).prop('checked',$('#father').prop('checked'));
 		});
+		checkedLength =  $('.son:checked').length;
 	});
 
 	//事件委托 动态生成的元素js会失效，把事件委托给父元素(也不能是动态生成)
@@ -453,6 +454,38 @@
 						refresh(1,3);
 					}
 				},'json');
+	}
+	
+	//点击删除按钮删除市场活动
+	function deleteActivity() {
+		layer.confirm('确定要删除该条记录吗？', {
+			btn: ['确定','取消'] //按钮
+		}, function(){
+			//点击确定按钮触发的事件
+			if(checkedLength > 1){
+				//弹出消息
+				layer.alert("只能选择一条记录", {icon: 5});
+			}else if(checkedLength == 0){
+				layer.alert("至少选择一条记录", {icon: 5});
+			}else if(checkedLength == 1){
+				//获取当前勾中的记录的主键，
+				//jquery-->js $变量[0]/$变量.get(0) js-->jquery $(变量)
+				//js对象
+				var selectedId = $('.son:checked')[0].value;
+				//发送异步请求从后台查询出数据
+				$.get("/crm/workbench/activity/deleteActivity",{'id':selectedId},function(data){
+					if(data.ok){
+						layer.alert(data.mess, {icon: 6});
+						//刷新页面
+						refresh(1,3);
+					}
+				},'json');
+			}
+		}, function(){
+			return;
+		});
+
+
 	}
 </script>
 </body>
