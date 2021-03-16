@@ -8,12 +8,11 @@ import com.bjpowernode.crm.settings.bean.User;
 import com.bjpowernode.crm.settings.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import tk.mybatis.mapper.entity.Example;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletContext;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 数据缓冲类
@@ -48,11 +47,27 @@ public class CrmCache {
         Map<String,List<DictionaryValue>> data = new HashMap<>();
         for (DictionaryType dictionaryType : dictionaryTypes) {
             DictionaryValue dictionaryValue = new DictionaryValue();
-            dictionaryValue.setTypeCode(dictionaryType.getCode());
             //查询每个数据字典种类下的所有字典值
-            List<DictionaryValue> dictionaryValues = dictionaryValueMapper.select(dictionaryValue);
+            Example example = new Example(DictionaryValue.class);
+            example.setOrderByClause("orderNo");
+            example.createCriteria().andEqualTo("typeCode",dictionaryType.getCode());
+            List<DictionaryValue> dictionaryValues = dictionaryValueMapper.selectByExample(example);
             data.put(dictionaryType.getCode(),dictionaryValues);
         }
         servletContext.setAttribute("data",data);
+
+        //缓冲阶段和可能性
+        Map<String,String> stage2Possibility = new TreeMap<>();
+        //找到属性文件 文件的后缀名不用写
+        ResourceBundle resourceBundle = ResourceBundle.getBundle("mybatis.Stage2Possibility");
+        Enumeration<String> keys = resourceBundle.getKeys();
+        //hasMoreElements:判断是否可以取出更多的元素
+        while(keys.hasMoreElements()){
+            //获取每一个元素
+            String key = keys.nextElement();
+            String value = resourceBundle.getString(key);
+            stage2Possibility.put(key,value);
+        }
+        servletContext.setAttribute("stage2Possibility",stage2Possibility);
     }
 }

@@ -49,6 +49,18 @@ public class ClueServiceImpl implements ClueService {
     @Autowired
     private CustomerRemarkMapper customerRemarkMapper;
 
+    @Autowired
+    private ContactsActivityRelationMapper contactsActivityRelationMapper;
+
+    @Autowired
+    private TransactionMapper transactionMapper;
+
+    @Autowired
+    private TransactionHistoryMapper transactionHistoryMapper;
+
+    @Autowired
+    private TransactionRemarkMapper transactionRemarkMapper;
+
     @Override
     public List<Clue> list(Clue clue) {
         Example example = new Example(Clue.class);
@@ -207,7 +219,7 @@ public class ClueServiceImpl implements ClueService {
     }
 
     @Override
-    public void transfer(String id,User user) {
+    public void transfer(String id,User user,String isTran,Transaction transaction) {
         int count = 0;
         //先把线索表中关于客户的信息抽取出来，保存在客户表中
         Clue clue = clueMapper.selectByPrimaryKey(id);
@@ -276,6 +288,85 @@ public class ClueServiceImpl implements ClueService {
             throw new CrmException(CrmEnum.CLUE_TRANSFER);
         }
 
+        //将"线索和市场活动的关系"转换到"联系人和市场活动的关系中"
+        ClueActivityRelation clueActivityRelation = new ClueActivityRelation();
+        clueActivityRelation.setClueId(id);
+        List<ClueActivityRelation> clueActivityRelations = clueActivityRelationMapper.select(clueActivityRelation);
+        for (ClueActivityRelation clueActivityRelation1 : clueActivityRelations) {
+            ContactsActivityRelation contactsActivityRelation = new ContactsActivityRelation();
+            contactsActivityRelation.setId(UUIDUtil.getUUID());
+            contactsActivityRelation.setActivityId(clueActivityRelation1.getActivityId());
+            contactsActivityRelation.setContactsId(contacts.getId());
+            count = contactsActivityRelationMapper.insert(contactsActivityRelation);
+            if(count == 0){
+                throw new CrmException(CrmEnum.CLUE_TRANSFER);
+            }
+        }
+
+        //如果转换过程中发生了交易，创建一条新的交易，交易信息不全，后面可以通过修改交易来完善交易信息
+        if(StrUtil.isNotEmpty(isTran)){
+            //发生交易
+            //创建交易对象
+            transaction.setId(UUIDUtil.getUUID());
+            transaction.setContactsId(contacts.getId());
+            transaction.setCreateBy(user.getName());
+            transaction.setCreateTime(DateTimeUtil.getSysTime());
+            transaction.setCustomerId(customer.getId());
+            transaction.setOwner(clue.getOwner());
+            count = transactionMapper.insertSelective(transaction);
+            if(count == 0){
+                throw new CrmException(CrmEnum.CLUE_TRANSFER);
+            }
+
+            //创建交易历史
+            TransactionHistory transactionHistory = new TransactionHistory();
+            transactionHistory.setId(UUIDUtil.getUUID());
+            transactionHistory.setCreateBy(user.getName());
+            transactionHistory.setCreateTime(DateTimeUtil.getSysTime());
+            transactionHistory.setExpectedDate(transaction.getExpectedDate());
+            transactionHistory.setMoney(transaction.getMoney());
+            transactionHistory.setStage(transaction.getStage());
+            transactionHistory.setTranId(transaction.getId());
+            count = transactionHistoryMapper.insertSelective(transactionHistory);
+            if(count == 0){
+                throw new CrmException(CrmEnum.CLUE_TRANSFER);
+            }
+
+            //创建交易备注
+            TransactionRemark transactionRemark = new TransactionRemark();
+            transactionRemark.setId(UUIDUtil.getUUID());
+            transactionRemark.setCreateBy(user.getName());
+            transactionRemark.setCreateTime(DateTimeUtil.getSysTime());
+            transactionRemark.setEditFlag("0");
+            transactionRemark.setTranId(transaction.getId());
+            count = transactionRemarkMapper.insertSelective(transactionRemark);
+            if(count == 0){
+                throw new CrmException(CrmEnum.CLUE_TRANSFER);
+            }
+        }
+
+        //删除线索的备注信息
+        ClueRemark clueRemark = new ClueRemark();
+        clueRemark.setClueId(clue.getId());
+        count = clueRemarkMapper.delete(clueRemark);
+        if(count == 0){
+            throw new CrmException(CrmEnum.CLUE_TRANSFER);
+        }
+
+        //删除线索和市场活动的关联关系，因为在第5步已经将"线索和市场活动的关系
+        // "转换到"联系人和市场活动的关系中"
+        ClueActivityRelation clueActivityRelation1 = new ClueActivityRelation();
+        clueActivityRelation1.setClueId(clue.getId());
+        count = clueActivityRelationMapper.delete(clueActivityRelation1);
+        if(count == 0){
+            throw new CrmException(CrmEnum.CLUE_TRANSFER);
+        }
+
+        //删除线索
+        count = clueMapper.deleteByPrimaryKey(id);
+        if(count == 0){
+            throw new CrmException(CrmEnum.CLUE_TRANSFER);
+        }
     }
 
 

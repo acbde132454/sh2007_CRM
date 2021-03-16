@@ -13,11 +13,10 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import tk.mybatis.mapper.entity.Example;
 
+import javax.persistence.Table;
 import javax.sql.DataSource;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class TestCrm {
 
@@ -173,5 +172,15 @@ public class TestCrm {
     @Test
     public void test11(){
         System.out.println(MD5Util.getMD5("admin"));
+    }
+
+    //测试map
+    @Test
+    public void test12(){
+        Map<String,String> map = new LinkedHashMap<>();
+        map.put("abc","张三");
+        map.put("def","李四");
+        map.put("ccc","王五");
+        System.out.println(map);
     }
 }

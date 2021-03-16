@@ -5,6 +5,7 @@ import com.bjpowernode.crm.base.exception.CrmException;
 import com.bjpowernode.crm.settings.bean.User;
 import com.bjpowernode.crm.workbench.bean.Activity;
 import com.bjpowernode.crm.workbench.bean.Clue;
+import com.bjpowernode.crm.workbench.bean.Transaction;
 import com.bjpowernode.crm.workbench.service.ClueService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -103,10 +104,17 @@ public class ClueController {
     //线索转换
     @RequestMapping("/workbench/clue/transfer")
     @ResponseBody
-    public ResultVo transfer(String id, HttpSession session){
+    public ResultVo transfer(String id, String isTran, HttpSession session, Transaction transaction){
         ResultVo resultVo = new ResultVo();
         User user = (User) session.getAttribute("user");
-        clueService.transfer(id,user);
+        try{
+            clueService.transfer(id,user,isTran,transaction);
+            resultVo.setOk(true);
+            resultVo.setMess("线索转换成功");
+        }catch (CrmException e){
+            resultVo.setOk(false);
+            resultVo.setMess(e.getMessage());
+        }
         return resultVo;
     }
 }
