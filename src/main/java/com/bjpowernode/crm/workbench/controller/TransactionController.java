@@ -1,5 +1,7 @@
 package com.bjpowernode.crm.workbench.controller;
 
+import com.alibaba.fastjson.JSONObject;
+import com.bjpowernode.crm.base.bean.ChartsVo;
 import com.bjpowernode.crm.settings.bean.User;
 import com.bjpowernode.crm.workbench.bean.Transaction;
 import com.bjpowernode.crm.workbench.bean.TransactionHistory;
@@ -13,7 +15,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.servlet.http.HttpSession;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 @Controller
 public class TransactionController {
@@ -62,5 +63,13 @@ public class TransactionController {
     public List<TransactionHistory> queryHistories(String id){
         List<TransactionHistory> transactionHistories = transactionService.queryHistories(id);
         return transactionHistories;
+    }
+
+    @RequestMapping("/workbench/transaction/chart")
+    @ResponseBody
+    public ChartsVo chart(){
+        ChartsVo pieChartsVo = transactionService.chart();
+       // String json = JSONObject.toJSONString(pieChartsVo);
+        return pieChartsVo;
     }
 }

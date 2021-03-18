@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bjpowernode.crm.workbench.mapper.TransactionMapper">
+
+    <!--统计处在不同阶段的交易的数量，不统计失败的情况
+        resultType:
+          基本类型
+          对象类型
+          map类型
+    -->
+    <!--<select id="chart" resultType="map">
+        select count(*) value,stage name from tbl_tran where possibility != 0 group by stage
+    </select>-->
+
+    <select id="chart" resultType="charts">
+        select count(*) value,stage name from tbl_tran where possibility != 0 group by stage
+    </select>
+
+</mapper>

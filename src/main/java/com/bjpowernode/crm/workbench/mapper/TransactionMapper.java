@@ -1,5 +1,6 @@
 package com.bjpowernode.crm.workbench.mapper;
 
+import com.bjpowernode.crm.base.bean.Charts;
 import com.bjpowernode.crm.workbench.bean.Transaction;
 import tk.mybatis.mapper.common.Mapper;
 
@@ -8,5 +9,5 @@ import java.util.Map;
 
 public interface TransactionMapper extends Mapper<Transaction> {
 
-    List<Map<String, String>> queryTransactionEcharts();
+    List<Charts> chart();
 }

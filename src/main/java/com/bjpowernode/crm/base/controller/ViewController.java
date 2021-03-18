@@ -13,11 +13,17 @@ public class ViewController {
 
     //workbench/main/index
     //workbench/customer/index
-    @RequestMapping("/toView/{firstView}/{secondView}/{thirdView}")
+    @RequestMapping({"/toView/{firstView}/{secondView}/{thirdView}","/toView/{firstView}/{secondView}/{thirdView}/{fourthView}"})
     public String toView(
-            @PathVariable("firstView") String firstView,
-            @PathVariable("secondView") String secondView,
-            @PathVariable("thirdView") String thirdView){
+            @PathVariable(value = "firstView",required = false) String firstView,
+            @PathVariable(value = "secondView",required = false) String secondView,
+            @PathVariable(value = "thirdView",required = false) String thirdView,
+            @PathVariable(value = "fourthView",required = false) String fourthView){
+
+          if(fourthView != null){
+              return firstView + File.separator + secondView + File.separatorChar + thirdView
+                      +File.separator + fourthView;
+          }
 
        // return "workbench/main/index";
         ///workbench/main/index

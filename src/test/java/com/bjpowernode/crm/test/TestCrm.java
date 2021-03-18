@@ -1,5 +1,7 @@
 package com.bjpowernode.crm.test;
 
+import com.alibaba.fastjson.JSONObject;
+import com.bjpowernode.crm.base.bean.ChartsVo;
 import com.bjpowernode.crm.base.constans.CrmEnum;
 import com.bjpowernode.crm.base.exception.CrmException;
 import com.bjpowernode.crm.base.util.MD5Util;
@@ -182,5 +184,18 @@ public class TestCrm {
         map.put("def","李四");
         map.put("ccc","王五");
         System.out.println(map);
+    }
+
+    @Test
+    public void test13(){
+        ChartsVo chartsVo = new ChartsVo();
+       List<String> counts = new ArrayList<>();
+       counts.add("1");
+       counts.add("2");
+       counts.add("3");
+       counts.add("4");
+        chartsVo.setCounts(counts);
+        String string = JSONObject.toJSONString(chartsVo);
+        System.out.println(string);
     }
 }

@@ -1,5 +1,7 @@
 package com.bjpowernode.crm.workbench.service;
 
+import com.bjpowernode.crm.base.bean.Charts;
+import com.bjpowernode.crm.base.bean.ChartsVo;
 import com.bjpowernode.crm.settings.bean.User;
 import com.bjpowernode.crm.workbench.bean.Transaction;
 import com.bjpowernode.crm.workbench.bean.TransactionHistory;
@@ -15,4 +17,6 @@ public interface TransactionService {
     List<Map<String,String>> queryStage(String id, Map<String,String> stage2Possibility, Integer index, User user);
 
     List<TransactionHistory> queryHistories(String id);
+
+    ChartsVo chart();
 }

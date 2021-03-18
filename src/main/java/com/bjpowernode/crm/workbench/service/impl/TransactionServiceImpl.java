@@ -1,5 +1,8 @@
 package com.bjpowernode.crm.workbench.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
+import com.bjpowernode.crm.base.bean.Charts;
+import com.bjpowernode.crm.base.bean.ChartsVo;
 import com.bjpowernode.crm.base.util.DateTimeUtil;
 import com.bjpowernode.crm.base.util.UUIDUtil;
 import com.bjpowernode.crm.settings.bean.User;
@@ -202,5 +205,51 @@ public class TransactionServiceImpl implements TransactionService {
         transactionHistory.setTranId(id);
         List<TransactionHistory> transactionHistories = transactionHistoryMapper.select(transactionHistory);
         return transactionHistories;
+    }
+
+    /*@Override
+    public ChartsVo chart() {
+        List<Map<String, String>> charts = transactionMapper.chart();
+
+        //饼状图/柱状图的标题List<String>
+        List<String> titles = new ArrayList<>();
+        for(Map<String, String> chart : charts){
+            titles.add(chart.get("name"));
+        }
+        //柱状图的数据
+        List<String> counts = new ArrayList<>();
+       for(Map<String, String> chart : charts){
+            counts.add(chart.get("value").toString());
+        }
+
+        //饼状图的数据  List<Map<String,String>> charts
+        ChartsVo pieChartsVo = new ChartsVo();
+        pieChartsVo.setTitles(titles);
+        pieChartsVo.setDataList(charts);
+        pieChartsVo.setCounts(counts);
+
+        String json = JSONObject.toJSONString(pieChartsVo);
+        return pieChartsVo;
+    }*/
+
+    @Override
+    public ChartsVo chart() {
+        ChartsVo chartsVo = new ChartsVo();
+        List<Charts> charts = transactionMapper.chart();
+
+        //饼状图/柱状图的标题List<String>
+        List<String> titles = new ArrayList<>();
+        for(Charts c : charts){
+            titles.add(c.getName());
+        }
+        chartsVo.setTitles(titles);
+        chartsVo.setCharts(charts);
+
+        List<String> counts = new ArrayList<>();
+        for(Charts c : charts){
+            counts.add(c.getValue());
+        }
+        chartsVo.setCounts(counts);
+        return chartsVo;
     }
 }
